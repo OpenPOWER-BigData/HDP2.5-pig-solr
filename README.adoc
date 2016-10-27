@@ -1,6 +1,3 @@
-:packageUser: solr
-:connectorVersion: 2.2.2
-
 = Lucidworks Pig Functions for Solr
 
 == Features
@@ -15,7 +12,6 @@ Supported versions are:
 * Pig versions 0.12, 0.13, 0.14, and 0.15
 * Hadoop 2.x
 
-// tag::pig-build[]
 == Build the Functions Jar
 
 Configure solr-hadoop-common submodule.
@@ -28,8 +24,8 @@ The build uses Gradle. To build the .jar files, run this command:
 
 This will make a .jar file:
 
-[listing, subs="attributes"]
-solr-pig-functions/build/libs/{packageUser}-pig-functions-{connectorVersion}.jar
+[listing]
+solr-pig-functions/build/libs/solr-pig-functions-{version}.jar
 
 The .jar is required to use Pig functions to index content to Solr.
 
@@ -38,7 +34,7 @@ The .jar is required to use Pig functions to index content to Solr.
 // tag::functions[]
 === Available Functions
 
-The Pig functions included in the `{packageUser}-pig-functions-{connectorVersion}.jar` are three UserDefined Functions (UDF) and one Store function. These functions are:
+The Pig functions included in the `solr-pig-functions-.jar` are three UserDefined Functions (UDF) and one Store function. These functions are:
 
 * `com/lucidworks/hadoop/pig/SolrStoreFunc.class`
 * `com/lucidworks/hadoop/pig/EpochToCalendar.class`
@@ -71,7 +67,7 @@ Two parameters provide the information the script needs to access the JAAS file:
 The path to the JAAS file that includes a section for the service principal who will write to the Solr indexes. For example, to use this property in a Pig script:
 +
 [source]
-set lww.jaas.file '/path/to/login.conf';
+set lww.jaas.file '/opt/${namePackage}/conf/login.conf';
 +
 The JAAS configuration file *must* be copied to the same path on every node where a Node Manager is running (i.e., every node where map/reduce tasks are executed).
 
@@ -100,26 +96,6 @@ Client { --<1>
 
 //end::kerberos-pig[]
 
-// tag::ssl-pig[]
-
-=== Indexing to a SSL-Enabled Solr Cluster
-
-When SSL is enabled in a Solr cluster, Pigs scripts must include the full paths to the `keystore` and `truststore` with their respective passwords.
-
-[source]
-set lww.keystore '/path/to/solr-ssl.keystore.jks'
-set lww.keystore.password 'secret'
-set lww.truststore '/path/to/solr-ssl.truststore.jks'
-set lww.truststore.password 'secret'
-
-[TIP]
-====
-The path (and secret configurations) should be the same in all YARN/MapReduce hosts.
-====
-
-//end::ssl-pig[]
-
-
 // tag::example-pig[]
 === Sample CSV Script
 
@@ -147,9 +123,9 @@ WARNING: When using `SolrStoreFunc`, the document ID *must* be the first field.
 
 When we want to run this script, we invoke Pig and define several parameters we have referenced in the script with the `-p` option, such as in this command:
 
-[source,bash,subs="attributes"]
+[source,bash]
 ----
-./bin/pig -Dpig.additional.jars=/path/to/{packageUser}-pig-functions-{connectorVersion}.jar -p csv=/path/to/my/csv/airports.dat -p zkHost=zknode1:2181,zknode2:2181,zknode3:2181/solr -p collection=myCollection ~/myScripts/index-csv.pig
+./bin/pig -Dpig.additional.jars=/path/to/solr-pig-functions.jar -p csv=/path/to/my/csv/airports.dat -p zkHost=zknode1:2181,zknode2:2181,zknode3:2181/solr -p collection=myCollection ~/myScripts/index-csv.pig
 ----
 
 The parameters to pass are:
@@ -171,6 +147,6 @@ If, however, you are not using SolrCloud, you can use the `solrUrl` parameter, w
 
 In the script, you would change the line that maps `solr.zkhost` to the `zkhost` property to map `solr.server.url` to the `solrUrl` property. For example:
 
-   `set solr.server.url '$solrUrl';`
+`set solr.server.url '$solrUrl';`
 ====
 // end::example[]
